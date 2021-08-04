@@ -296,7 +296,7 @@ bool S3TransferManager::UploadFileToS3(const std::string &path, const void *cont
 
     LogDetails(requestPtr);
 
-    return (requestPtr->GetStatus() == Aws::Transfer::TransferStatus::COMPLETED); 
+    return (requestPtr->GetStatus() == Aws::Transfer::TransferStatus::COMPLETED);
 }
 
 bool S3TransferManager::DownloadFileFromS3(const std::string &path, void **content, int64_t *size) {

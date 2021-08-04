@@ -33,7 +33,7 @@ set(JSONCPP_CXX11 ON) #TODO: does this work?
 
 # Parameters of the build
 set(STATIC_BUILD OFF CACHE BOOL "Static build of the third-party libraries (necessary for Windows)")
-set(ALLOW_DOWNLOADS OFF CACHE BOOL "Allow CMake to download packages")
+set(ALLOW_DOWNLOADS ON "Allow CMake to download packages")
 set(ORTHANC_FRAMEWORK_SOURCE "${ORTHANC_FRAMEWORK_DEFAULT_SOURCE}" CACHE STRING "Source of the Orthanc source code (can be \"hg\", \"archive\", \"web\" or \"path\")")
 set(ORTHANC_FRAMEWORK_ARCHIVE "" CACHE STRING "Path to the Orthanc archive, if ORTHANC_FRAMEWORK_SOURCE is \"archive\"")
 set(ORTHANC_FRAMEWORK_ROOT "" CACHE STRING "Path to the Orthanc source directory, if ORTHANC_FRAMEWORK_SOURCE is \"path\"")
@@ -54,16 +54,33 @@ set(USE_BOOST_ICONV ON)
 set(ENABLE_SSL ON)
 set(ENABLE_WEB_CLIENT ON)
 
-include(${ORTHANC_ROOT}/Resources/CMake/OrthancFrameworkConfiguration.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/OrthancFrameworkConfiguration.cmake)
 include_directories(${ORTHANC_ROOT})
 
-include(${ORTHANC_ROOT}/Resources/CMake/DownloadPackage.cmake)
-include(${ORTHANC_ROOT}/Resources/CMake/BoostConfiguration.cmake)
-include(${ORTHANC_ROOT}/Resources/CMake/JsonCppConfiguration.cmake)
-include(${ORTHANC_ROOT}/Resources/CMake/LibCurlConfiguration.cmake)
-include(${ORTHANC_ROOT}/Resources/CMake/OpenSslConfiguration.cmake)
-include(${ORTHANC_ROOT}/Resources/CMake/ZlibConfiguration.cmake)
-include(${CMAKE_SOURCE_DIR}/Resources/CMake/AwsSdkConfiguration.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/DownloadPackage.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/BoostConfiguration.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/JsonCppConfiguration.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/LibCurlConfiguration.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/OpenSslConfigurationStatic-1.1.1.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/ZlibConfiguration.cmake)
+# include(${CMAKE_SOURCE_DIR}/Resources/CMake/AwsSdkConfiguration.cmake)
+
+# Setup for AWS SDK.
+# This is a bit mad, as their own packaging installs the C and C++ API components in different places.
+list(APPEND awssdk_root_globs /usr/mbi/lib/cmake/* /usr/mbi/lib/*)
+file(GLOB awssdk_all LIST_DIRECTORIES true ${awssdk_root_globs})
+file(GLOB awssdk_files LIST_DIRECTORIES false ${awssdk_root_globs})
+# compute set difference ...
+list(APPEND awssdk_subdirs ${awssdk_all})
+list(REMOVE_ITEM awssdk_subdirs ${awssdk_files})
+# now configure with the result
+list(APPEND CMAKE_MODULE_PATH ${awssdk_subdirs})
+list(APPEND CMAKE_PREFIX_PATH ${awssdk_subdirs})
+# now we can use it
+#set(AWSSDK_DIR /usr/mbi/lib/cmake/AWSSDK)
+find_package(AWSSDK REQUIRED COMPONENTS s3 sts transfer)
+
+
 
 message("ORTHANC_ROOT: ${ORTHANC_ROOT}")
 message("STATIC_BUILD: ${STATIC_BUILD}")
