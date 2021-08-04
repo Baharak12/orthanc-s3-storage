@@ -72,7 +72,7 @@ class S3Direct : public S3Impl
 public:
     S3Direct(OrthancPluginContext *c):
         S3Impl(c) {
-        LogInfo(_context, "[S3] S3Direct");
+        LogInfo("[S3] S3Direct");
     };
 
     bool UploadFileToS3(const std::string & path, const void *content, const int64_t &size);
@@ -90,7 +90,7 @@ class S3TransferManager : public S3Impl
 public:
     S3TransferManager(OrthancPluginContext *c):
         S3Impl(c) {
-        LogInfo(_context, "[S3] S3TransferManager");
+        LogInfo("[S3] S3TransferManager");
     };
 
     bool ConfigureAwsSdk(const std::string& s3_access_key, const std::string& s3_secret_key,

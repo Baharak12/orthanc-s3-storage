@@ -81,7 +81,7 @@ static OrthancPluginErrorCode StorageCreate(const char* uuid,
     {
         std::stringstream ss;
         ss << "[S3] PUT: " << uuid << " begin";
-        LogInfo(context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     }
 
     try {
@@ -90,7 +90,7 @@ static OrthancPluginErrorCode StorageCreate(const char* uuid,
     } catch (Orthanc::OrthancException &e) {
         std::stringstream err;
         err << "[S3] Could not open uuid: " << path << ", " << e.What();
-        LogError(context, err.str().c_str());
+        LogError(err.str().c_str());
         ok = false;
     }
 
@@ -98,7 +98,7 @@ static OrthancPluginErrorCode StorageCreate(const char* uuid,
         auto executionDuration = timer.elapsed();
         std::stringstream ss;
         ss << "[S3] PUT " << uuid << " finished in " << executionDuration << "us";
-        LogInfo(context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     }
 
     return ok ? OrthancPluginErrorCode_Success : OrthancPluginErrorCode_StorageAreaPlugin;
@@ -117,7 +117,7 @@ static OrthancPluginErrorCode StorageRead(void** content,
     {
         std::stringstream ss;
         ss << "[S3] GET: " << uuid;
-        LogInfo(context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     }
 
     try {
@@ -126,7 +126,7 @@ static OrthancPluginErrorCode StorageRead(void** content,
     } catch (Orthanc::OrthancException &e) {
         std::stringstream err;
         err << "[S3] Could not read file: " << path << ", " << e.What();
-        LogError(context, err.str().c_str());
+        LogError(err.str().c_str());
         ok = false;
     }
 
@@ -135,7 +135,7 @@ static OrthancPluginErrorCode StorageRead(void** content,
         auto executionDuration = timer.elapsed();
         std::stringstream ss;
         ss << "[S3] GET " << uuid << " finished in " << executionDuration << "us";
-        LogInfo(context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     }
 
     return ok ? OrthancPluginErrorCode_Success : OrthancPluginErrorCode_StorageAreaPlugin;
@@ -152,7 +152,7 @@ static OrthancPluginErrorCode StorageRemove(const char* uuid,
     {
         std::stringstream ss;
         ss << "[S3] DELETE: " << uuid;
-        LogInfo(context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     }
 
     try {
@@ -161,7 +161,7 @@ static OrthancPluginErrorCode StorageRemove(const char* uuid,
     } catch (Orthanc::OrthancException &e) {
         std::stringstream err;
         err <<"[S3] Could not remove file: " << path << ", " << e.What();
-        LogError(context, err.str().c_str());
+        LogError(err.str().c_str());
         ok = false;
     }
 
@@ -169,7 +169,7 @@ static OrthancPluginErrorCode StorageRemove(const char* uuid,
         auto executionDuration = timer.elapsed();
         std::stringstream ss;
         ss << "[S3] DELETE; " << uuid << " finished in " << executionDuration << "us";
-        LogInfo(context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     }
 
     return ok ? OrthancPluginErrorCode_Success: OrthancPluginErrorCode_StorageAreaPlugin;
@@ -183,7 +183,7 @@ bool readS3Configuration(OrthancPluginContext* context, S3PluginContext& c) {
     indexDir = configuration.GetStringValue("IndexDirectory", indexDir.c_str());  //last parameter = default value
 
     if (indexDir.empty()) {
-        LogWarning(context, "StorageDir and IndexDir were not set.");
+        LogWarning("StorageDir and IndexDir were not set.");
     }
 
     //make sure indexDir exist
@@ -194,7 +194,7 @@ bool readS3Configuration(OrthancPluginContext* context, S3PluginContext& c) {
     if (configuration.IsSection("S3")) {
         configuration.GetSection(s3_configuration, "S3");
     } else {
-        LogError(context, "Can't find `S3` section in the config.");
+        LogError("Can't find `S3` section in the config.");
         return false;
     }
 
@@ -215,17 +215,17 @@ bool readS3Configuration(OrthancPluginContext* context, S3PluginContext& c) {
 
     // Log stuff
     if (!c.s3_access_key.empty())
-        LogInfo(context, "[S3] Aws Access Key set");
+        LogInfo("[S3] Aws Access Key set");
     if (!c.s3_secret_key.empty())
-        LogInfo(context, "[S3] Aws Secret Key set");
+        LogInfo("[S3] Aws Secret Key set");
 
     std::stringstream log_region;
     log_region << "[S3] Aws region: " << c.s3_region;
-    LogInfo(context, log_region.str().c_str());
+    LogInfo(log_region.str().c_str());
 
     std::stringstream log_bucket;
     log_bucket << "[S3] Aws bucket: " << c.s3_bucket_name;
-    LogInfo(context, log_bucket.str().c_str());
+    LogInfo(log_bucket.str().c_str());
 
     return true;
 }
@@ -236,7 +236,7 @@ extern "C" {
 ORTHANC_PLUGINS_API int32_t OrthancPluginInitialize(OrthancPluginContext* pluginContext)
 {
     context = pluginContext;
-    LogWarning(context, "[S3] Storage plugin is initializing");
+    LogWarning("[S3] Storage plugin is initializing");
 
     /* Check the version of the Orthanc core */
     if (OrthancPluginCheckVersion(context) == 0)
@@ -247,7 +247,7 @@ ORTHANC_PLUGINS_API int32_t OrthancPluginInitialize(OrthancPluginContext* plugin
         << ORTHANC_PLUGINS_MINIMAL_MINOR_NUMBER << '.'
         << ORTHANC_PLUGINS_MINIMAL_REVISION_NUMBER << '.'
         << " to run this plugin";
-        LogError(context, ss.str());
+        LogError(ss.str());
         return -1;
     }
 
@@ -280,7 +280,7 @@ ORTHANC_PLUGINS_API void OrthancPluginFinalize()
 {
     s3.release();
 
-    LogWarning(context, "[S3] Storage plugin is finalizing");
+    LogWarning("[S3] Storage plugin is finalizing");
 }
 
 

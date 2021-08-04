@@ -9,7 +9,7 @@ set(VERSION_MINOR "2" )
 set(VERSION_PATCH "1" )
 set(PLUGIN_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
-set(ORTHANC_SDK_VERSION "1.4.0")
+set(ORTHANC_SDK_VERSION "1.9.6")
 
 if (PLUGIN_VERSION STREQUAL "mainline")
     set(ORTHANC_FRAMEWORK_VERSION "mainline")
@@ -45,7 +45,7 @@ set(USE_SYSTEM_ORTHANC_SDK ON CACHE BOOL "Use the system version of the Orthanc 
 include(${CMAKE_SOURCE_DIR}/Resources/Orthanc/DownloadOrthancFramework.cmake)
 
 set(ORTHANC_FRAMEWORK_PLUGIN ON)
-include(${ORTHANC_ROOT}/Resources/CMake/OrthancFrameworkParameters.cmake)
+include(${ORTHANC_ROOT}/OrthancFramework/Resources/CMake/OrthancFrameworkParameters.cmake)
 
 set(ENABLE_LOCALE ON)         # Enable support for locales (notably in Boost)
 set(ENABLE_GOOGLE_TEST OFF)
@@ -100,7 +100,8 @@ set(SOURCES
         src/S3ops.cpp
         )
 
-include_directories(${ORTHANC_ROOT}/Core)  # To access "OrthancException.h"
+include_directories(${ORTHANC_ROOT}/OrthancFramework/Sources)  # To access "OrthancException.h"
+include_directories(${ORTHANC_ROOT}/OrthancServer/Plugins/Samples/Common)
 add_definitions(
         -DHAS_ORTHANC_EXCEPTION=1
         -DORTHANC_ENABLE_LOGGING_PLUGIN=1
@@ -120,7 +121,7 @@ endif (NOT USE_SYSTEM_BOOST)
 
 add_library(OrthancS3StoragePlugin SHARED
         ${SOURCES}
-        ${ORTHANC_ROOT}/Plugins/Samples/Common/OrthancPluginCppWrapper.cpp
+        ${ORTHANC_ROOT}/OrthancServer/Plugins/Samples/Common/OrthancPluginCppWrapper.cpp
         ${ORTHANC_CORE_SOURCES}
         )
 
@@ -134,7 +135,7 @@ set_target_properties(OrthancS3StoragePlugin PROPERTIES
         SOVERSION ${ORTHANC_SDK_VERSION}-${PLUGIN_VERSION}
         )
 
-target_link_libraries(OrthancS3StoragePlugin)
+target_link_libraries(OrthancS3StoragePlugin ${AWSSDK_LINK_LIBRARIES})
 
 install(
         TARGETS OrthancS3StoragePlugin
@@ -152,7 +153,7 @@ if (test)
     endif (APPLE)
 
     # Download and unpack googletest at configure time
-    configure_file(${CMAKE_SOURCE_DIR}/Resources/GoogleTest/CMakeLists.txt.in googletest-download/CMakeLists.txt)
+    configure_file(${CMAKE_SOURCE_DIR}/OrthancFramework/Resources/GoogleTest/CMakeLists.txt.in googletest-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
             RESULT_VARIABLE result
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )

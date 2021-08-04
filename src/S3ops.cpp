@@ -76,7 +76,7 @@ bool S3Impl::ConfigureAwsSdk(const std::string& s3_access_key,  const std::strin
     aws_client_config.caPath = Aws::String("/etc/ssl/certs/");
 
     if (!s3_access_key.empty() && !s3_secret_key.empty()) {
-        LogInfo(_context, "[S3] Using credentials from the config file");
+        LogInfo("[S3] Using credentials from the config file");
         s3_client = Aws::MakeShared<Aws::S3::S3Client>(
                     ALLOCATION_TAG,
                     Aws::Auth::AWSCredentials(s3_access_key.c_str(), s3_secret_key.c_str()),
@@ -86,7 +86,7 @@ bool S3Impl::ConfigureAwsSdk(const std::string& s3_access_key,  const std::strin
                     );
 
     } else {
-        LogInfo(_context, "No credentials in the config file. Falling back to ~/.aws/credentials or env variables.");
+        LogInfo("No credentials in the config file. Falling back to ~/.aws/credentials or env variables.");
         s3_client = Aws::MakeShared<Aws::S3::S3Client>(ALLOCATION_TAG,
                                                        aws_client_config,
                                                        Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never,
@@ -98,7 +98,7 @@ bool S3Impl::ConfigureAwsSdk(const std::string& s3_access_key,  const std::strin
 
     std::stringstream ss;
     ss <<  "[S3] Checking bucket: " << _bucket_name;
-    LogInfo(_context, ss.str().c_str());
+    LogInfo(ss.str().c_str());
 
     //Create bucket if it doesn't exist
     //and verify if it exists
@@ -119,17 +119,17 @@ bool S3Impl::ConfigureAwsSdk(const std::string& s3_access_key,  const std::strin
             outcome.GetError().GetErrorType() == Aws::S3::S3Errors::BUCKET_ALREADY_EXISTS ) {
         std::stringstream ss;
         ss << "[S3] Bucket exists: " << _bucket_name;
-        LogInfo(_context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     } else if (outcome.IsSuccess()) {
         std::stringstream ss;
         ss << "[S3] Bucket created: " << _bucket_name;
-        LogInfo(_context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
     } else {
         std::stringstream err;
         err << "[S3] Create Bucket error: " <<
                outcome.GetError().GetExceptionName() << " " <<
                outcome.GetError().GetMessage();
-        LogError(_context, err.str().c_str());
+        LogError(err.str().c_str());
         return false;
     }
 
@@ -161,7 +161,7 @@ bool S3Direct::UploadFileToS3(const std::string &path, const void *content, cons
         err << "[S3] PUT error: " <<
                put_object_outcome.GetError().GetExceptionName() << " " <<
                put_object_outcome.GetError().GetMessage();
-        LogError(_context, err.str().c_str());
+        LogError(err.str().c_str());
 
         return false;
     }
@@ -198,7 +198,7 @@ bool S3Direct::DownloadFileFromS3(const std::string &path, void **content, int64
         err << "[S3] GET error: " <<
                get_object_outcome.GetError().GetExceptionName() << " " <<
                get_object_outcome.GetError().GetMessage();
-        LogError(_context, err.str().c_str());
+        LogError(err.str().c_str());
 
         return false;
     }
@@ -219,7 +219,7 @@ bool S3Direct::DeleteFileFromS3(const std::string &path) {
         err << "[S3] DELETE error: " <<
                delete_object_outcome.GetError().GetExceptionName() << " " <<
                delete_object_outcome.GetError().GetMessage();
-        LogError(_context, err.str().c_str());
+        LogError(err.str().c_str());
 
         return false;
     }
@@ -252,7 +252,7 @@ void S3TransferManager::LogDetails(const std::shared_ptr<const Aws::Transfer::Tr
     ss << ", pending: " << req->GetPendingParts().size();
     ss << ", queued: " << req->GetQueuedParts().size();
 
-    LogInfo(_context, ss.str().c_str());
+    LogInfo(ss.str().c_str());
 }
 
 bool S3TransferManager::ConfigureAwsSdk(const std::string &s3_access_key, const std::string &s3_secret_key, const std::string &s3_bucket_name, const std::string &s3_region) {
@@ -307,7 +307,7 @@ bool S3TransferManager::DownloadFileFromS3(const std::string &path, void **conte
     {
         std::stringstream ss;
         ss << "[S3] Using tmp: " << tempstr << '.';
-        LogInfo(_context, ss.str());
+        LogInfo(ss.str());
     }
 
     auto requestPtr = _tm->DownloadFile(_bucket_name,
@@ -325,7 +325,7 @@ bool S3TransferManager::DownloadFileFromS3(const std::string &path, void **conte
 
             std::stringstream ss;
             ss << "[S3] Failed to read file: " << tempstr << ", " << e.What();
-            LogError(_context, ss.str());
+            LogError(ss.str());
 
             return false;
         }
@@ -333,7 +333,7 @@ bool S3TransferManager::DownloadFileFromS3(const std::string &path, void **conte
         std::stringstream ss;
         auto err = requestPtr->GetLastError();
         ss << "[S3] Failed to get file: " << path << " because of: " << err.GetMessage() <<'.';
-        LogError(_context, ss.str());
+        LogError(ss.str());
     }
 
     std::remove(tempstr.c_str());
@@ -355,13 +355,13 @@ bool S3TransferManager::DownloadFileFromS3(const std::string &path, void **conte
                                         [=](){
         auto* out = Aws::New<Aws::IOStream>(ALLOCATION_TAG, buf.get());
 
-        LogInfo(_context, "Creating stream");
+        LogInfo("Creating stream");
         return out;
     });
 
     requestPtr->WaitUntilFinished();
 
-    LogInfo (_context, "Finished");
+    LogInfo ("Finished");
 
     if (requestPtr->GetStatus() == Aws::Transfer::TransferStatus::COMPLETED) {
         LogDetails (requestPtr);
@@ -383,18 +383,18 @@ bool S3TransferManager::DownloadFileFromS3(const std::string &path, void **conte
         ss << "s2: " << s2 << '\n';
         ss << "s3: " << s3 << '\n';
         ss << "s4: " << s4 << '\n';
-        LogInfo(_context, ss.str().c_str());
+        LogInfo(ss.str().c_str());
 
         *content = buf->get();
 
         if (*content == nullptr) {
-            LogError(_context, "Error allocating memory");
+            LogError("Error allocating memory");
             return false;
         }
 
-        //LogInfo(_context, "Copying memory");
+        //LogInfo("Copying memory");
         //oss->rdbuf()->sgetn(static_cast<char*>(*content), *size);
-        LogInfo(_context, "DONE");
+        LogInfo("DONE");
     }
 
     return (requestPtr->GetStatus() == Aws::Transfer::TransferStatus::COMPLETED);
@@ -414,7 +414,7 @@ bool S3TransferManager::DeleteFileFromS3(const std::string &path) {
         err << "[S3] DELETE error: " <<
                delete_object_outcome.GetError().GetExceptionName() << " " <<
                delete_object_outcome.GetError().GetMessage();
-        LogError(_context, err.str().c_str());
+        LogError(err.str().c_str());
 
         return false;
     }

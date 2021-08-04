@@ -20,7 +20,7 @@
  **/
 
 #include "Utils.hpp"
-#include "Core/OrthancException.h"
+#include "OrthancException.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
